@@ -1,0 +1,30 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  delay?: number;
+}
+
+const { project, delay = 0 } = Astro.props;
+const { title, category, cover, coverAlt, coverPosition, blend } = project.data;
+---
+
+<a class="card" href={`/work/${project.id}`}>
+  <div class="card__well">
+    <Image
+      src={cover}
+      alt={coverAlt}
+      widths={[400, 640, 900, 1200]}
+      sizes="(max-width: 600px) 100vw, (max-width: 1100px) 50vw, min(33vw, 420px)"
+      class:list={['card__image', { blend }]}
+      style={`object-position: ${coverPosition}; --reveal-delay: ${delay}ms`}
+      data-reveal
+    />
+  </div>
+  <div class="card__meta">
+    <span class="card__title">{title}</span>
+    <span class="card__category">{category}</span>
+  </div>
+</a>

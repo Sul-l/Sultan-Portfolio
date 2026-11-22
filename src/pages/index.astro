@@ -1,0 +1,119 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { getProjects } from '../lib/projects';
+import { SECTIONS } from '../lib/sections';
+import { SITE } from '../site';
+import '../styles/sections.css';
+
+// Projects come sorted print first, then social, then illustration (see src/lib/sections.ts)
+const projects = await getProjects();
+const featured = projects.find((p) => p.data.featured) ?? projects[0];
+const rest = projects.filter((p) => p !== featured);
+const filters = SECTIONS.filter((s) => rest.some((p) => p.data.section === s.key));
+
+// "A concept campaign..." becomes "Sailor Fude de Mannen, a concept campaign..."
+const caption = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
+---
+
+<Base>
+  <section class="wrap hero">
+    <div>
+      <p class="kicker">{SITE.tagline}</p>
+      <h1 class="hero__name">Sultan<br />Alghamdi</h1>
+      <p class="lede">Brand identity, print and illustration, made with a painter's hand.</p>
+      <div class="hero__actions">
+        <a class="text-link" href="#work">View selected work</a>
+        <a class="quiet-link" href="/about">About me</a>
+      </div>
+    </div>
+    {
+      featured && (
+        <figure class="hero__figure">
+          <a href={`/work/${featured.id}`}>
+            <Image
+              src={featured.data.cover}
+              alt={featured.data.coverAlt}
+              widths={[640, 960, 1280, 1800]}
+              sizes="(max-width: 860px) 100vw, 58vw"
+              loading="eager"
+              class:list={['hero__image', { blend: featured.data.blend }]}
+              style={`object-position: ${featured.data.coverPosition}`}
+              data-reveal
+            />
+            <figcaption class="caption">
+              <span class="caption__title">{featured.data.title}</span>, {caption(featured.data.summary)}
+            </figcaption>
+          </a>
+        </figure>
+      )
+    }
+  </section>
+
+  <section class="wrap work" id="work" aria-labelledby="work-title">
+    <div class="work__head">
+      <h2 class="section-title" id="work-title">Selected work</h2>
+      {
+        filters.length > 1 && (
+          <div class="filters" role="group" aria-label="Filter projects" data-filters hidden>
+            <button class="filter" type="button" aria-pressed="true" data-filter="all">
+              All
+            </button>
+            {filters.map((f) => (
+              <button class="filter" type="button" aria-pressed="false" data-filter={f.key}>
+                {f.short}
+              </button>
+            ))}
+          </div>
+        )
+      }
+    </div>
+    <ul class="grid" data-grid>
+      {
+        rest.map((project, i) => (
+          <li data-section={project.data.section}>
+            <ProjectCard project={project} delay={(i % 3) * 140} />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>
+
+<script>
+  // Filters. The address bar remembers the choice (e.g. /#print), so links,
+  // refreshes and the "All work" link on a project page land on the right filter.
+  // Without JS the buttons stay hidden and every project shows.
+  const bar = document.querySelector<HTMLElement>('[data-filters]');
+  const items = document.querySelectorAll<HTMLElement>('[data-grid] > li');
+  if (bar) {
+    bar.hidden = false;
+    const buttons = [...bar.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    const keys = buttons.map((b) => b.dataset.filter);
+
+    const apply = (value: string) => {
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === value)));
+      items.forEach((li) => {
+        li.hidden = value !== 'all' && li.dataset.section !== value;
+      });
+    };
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const value = btn.dataset.filter ?? 'all';
+        apply(value);
+        history.replaceState(null, '', value === 'all' ? '#work' : `#${value}`);
+      });
+    });
+
+    const fromHash = () => {
+      const key = location.hash.slice(1);
+      if (!keys.includes(key) || key === 'all') return;
+      apply(key);
+      document.getElementById('work')?.scrollIntoView();
+    };
+    fromHash();
+    window.addEventListener('hashchange', fromHash);
+  }
+</script>

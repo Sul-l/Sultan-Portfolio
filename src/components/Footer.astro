@@ -1,0 +1,31 @@
+---
+import { SITE } from '../site';
+
+const links = SITE.links.filter((l) => l.href);
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer" id="contact">
+  <div class="wrap site-footer__inner">
+    <div>
+      <h2 class="site-footer__cta">Have a project in mind?</h2>
+      <a class="site-footer__email" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+    </div>
+    <div class="site-footer__base">
+      <span>&copy; {year} {SITE.name}</span>
+      {
+        links.length > 0 && (
+          <ul>
+            {links.map((l) => (
+              <li>
+                <a href={l.href} rel="me noopener" target="_blank">
+                  {l.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </div>
+</footer>

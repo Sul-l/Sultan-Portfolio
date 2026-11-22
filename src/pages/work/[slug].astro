@@ -1,0 +1,101 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { getProjects } from '../../lib/projects';
+import '../../styles/sections.css';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project, i) => ({
+    params: { slug: project.id },
+    props: { project, next: projects[(i + 1) % projects.length] },
+  }));
+}
+
+const { project, next } = Astro.props;
+const { title, summary, section, category, client, year, role, cover, coverAlt, blend, gallery, galleryColumns } =
+  project.data;
+const { Content } = await render(project);
+
+// Portrait covers (posters, booklets, social posts) are shown at screen height instead of full width.
+const tallCover = cover.height > cover.width * 1.05;
+
+const facts = [
+  { label: 'Client', value: client },
+  { label: 'Year', value: year },
+  { label: 'Role', value: role },
+  { label: 'Discipline', value: category },
+].filter((f) => f.value !== undefined && f.value !== '');
+---
+
+<Base title={title} description={summary}>
+  <div class:list={['wrap', `study--${section}`]}>
+    <a class="back quiet-link" href={`/#${section}`}>All work</a>
+
+    <header class="study__head">
+      <h1 class="study__title">{title}</h1>
+      <p class="lede">{summary}</p>
+    </header>
+
+    <figure class:list={['study__cover', { 'study__cover--tall': tallCover }]}>
+      <Image
+        src={cover}
+        alt={coverAlt}
+        widths={tallCover ? [600, 900, 1300] : [800, 1280, 1800, 2400]}
+        sizes={tallCover ? '(max-width: 860px) 100vw, 640px' : '(max-width: 1440px) 100vw, 1280px'}
+        loading="eager"
+        class:list={[{ blend }]}
+        data-reveal
+      />
+    </figure>
+
+    <div class="study__body">
+      <dl class="facts">
+        {
+          facts.map((f) => (
+            <div>
+              <dt>{f.label}</dt>
+              <dd>{f.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+
+    {
+      gallery.length > 0 && (
+        <div class:list={['gallery', { 'gallery--3': galleryColumns === 3 }]}>
+          {gallery.map((g, i) => (
+            <figure class:list={[{ 'is-wide': g.wide }]}>
+              <Image
+                src={g.src}
+                alt={g.alt}
+                widths={g.wide ? [800, 1280, 1800, 2400] : [500, 800, 1300]}
+                sizes={g.wide ? '(max-width: 1440px) 100vw, 1280px' : '(max-width: 860px) 100vw, 640px'}
+                class:list={[{ blend }]}
+                style={`--reveal-delay: ${(i % galleryColumns) * 120}ms`}
+                data-reveal
+              />
+              {g.caption && <figcaption class="caption">{g.caption}</figcaption>}
+            </figure>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      next && next.id !== project.id && (
+        <nav class="next" aria-label="Next project">
+          <a href={`/work/${next.id}`}>
+            <span class="next__label">Next project</span>
+            <span class="next__title">{next.data.title}</span>
+          </a>
+        </nav>
+      )
+    }
+  </div>
+</Base>

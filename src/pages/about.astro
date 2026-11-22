@@ -1,0 +1,68 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site';
+
+// Draft copy: rewrite it in your own voice.
+const services = ['Brand identity and positioning', 'Print and editorial', 'Illustration', 'Web design and build'];
+const experience = [{ role: 'Graphic Design Officer', place: 'Salfa Perfumes' }];
+const education = [{ role: 'Information Systems', place: 'King Abdulaziz University, Jeddah' }];
+const tools = 'Adobe Creative Suite, Affinity, Clip Studio Paint, HTML, CSS and JavaScript';
+---
+
+<Base title="About" description={`About ${SITE.name}, ${SITE.tagline.toLowerCase()}.`}>
+  <div class="wrap about">
+    <div>
+      <h1 class="about__title">About</h1>
+      <div class="prose">
+        <p>
+          I'm Sultan, a graphic designer and illustrator based in Jeddah. I work across brand identity, print and
+          illustration, and I like projects where a drawn, bold human touch can set a brand apart.
+        </p>
+        <p>
+          My illustration is painted digitally in Clip Studio Paint, and my layout and print work is built in
+          Adobe CC and Affinity. I studied Information Systems at King Abdulaziz University, so I'm as comfortable building a
+          website as I am designing one.
+        </p>
+      </div>
+    </div>
+
+    <aside class="about__side" aria-label="Details">
+      <section class="list-block">
+        <h2>What I do</h2>
+        <ul>{services.map((s) => <li>{s}</li>)}</ul>
+      </section>
+      <section class="list-block">
+        <h2>Experience</h2>
+        <ul>
+          {
+            experience.map((e) => (
+              <li>
+                {e.role}
+                <span>{e.place}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+      <section class="list-block">
+        <h2>Education</h2>
+        <ul>
+          {
+            education.map((e) => (
+              <li>
+                {e.role}
+                <span>{e.place}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+      <section class="list-block">
+        <h2>Tools</h2>
+        <ul>
+          <li>{tools}</li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+</Base>
