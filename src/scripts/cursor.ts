@@ -32,7 +32,7 @@ function build() {
 
 function stateFor(target: Element | null): State {
   if (!target) return 'hidden';
-  if (target.closest('.card, .hero__figure a')) return 'view';
+  if (target.closest('.card, .hero__figure a, a[data-lightbox]')) return 'view';
   if (target.closest('a.back')) return 'back';
   if (getComputedStyle(target).cursor !== 'none') return 'hidden';
   if (target.closest('a, button, [role="button"]')) return 'link';

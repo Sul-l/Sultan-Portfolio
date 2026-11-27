@@ -435,63 +435,12 @@ a {
   mix-blend-mode: multiply;
 }
 
-/* ---------- Case study ---------- */
+/* ---------- Project page ----------
+   Shared bits only; the project page layout lives in src/styles/project.css */
 .back {
   display: inline-block;
   margin-top: 2.5rem;
   font-size: 0.9375rem;
-}
-
-.study__head {
-  padding-block: 2rem clamp(2.5rem, 5vw, 4rem);
-  display: grid;
-  gap: 1.5rem;
-}
-
-.study__title {
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 500;
-  font-size: clamp(3.25rem, 7vw, 6rem);
-  line-height: 0.95;
-  margin: 0;
-}
-
-.study__cover {
-  margin: 0;
-}
-
-.study__cover img {
-  width: 100%;
-}
-
-.study__body {
-  display: grid;
-  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
-  gap: clamp(2rem, 5vw, 4.5rem);
-  padding-block: clamp(3rem, 6vw, 5rem);
-}
-
-.facts {
-  margin: 0;
-  display: grid;
-  gap: 1.25rem;
-  align-content: start;
-  font-size: 0.9375rem;
-}
-
-.facts div {
-  border-top: 1px solid var(--rule);
-  padding-top: 0.75rem;
-}
-
-.facts dt {
-  color: var(--muted);
-  font-size: 0.8125rem;
-}
-
-.facts dd {
-  margin: 0.25rem 0 0;
 }
 
 .prose {
@@ -514,21 +463,6 @@ a {
 
 .prose p {
   margin: 0 0 1.1em;
-}
-
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 2.5rem;
-  padding-bottom: clamp(3rem, 6vw, 5rem);
-}
-
-.gallery figure {
-  margin: 0;
-}
-
-.gallery .is-wide {
-  grid-column: 1 / -1;
 }
 
 .next {
@@ -852,7 +786,7 @@ a {
 
 .card__image,
 .hero__image,
-.study__cover img {
+.plate--cover .plate__image {
   view-transition-class: project;
 }
 
@@ -893,17 +827,12 @@ a {
 
 @media (max-width: 860px) {
   .hero,
-  .study__body,
   .about {
     grid-template-columns: minmax(0, 1fr);
   }
 
   .hero {
     align-items: start;
-  }
-
-  .gallery {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 

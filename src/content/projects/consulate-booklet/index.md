@@ -9,27 +9,43 @@ coverAlt: Booklet cover with a pink sakura emblem above the title Consulate-Gene
 year: 2026
 role: Design, layout and compilation
 order: 2
+coverCaption: fig. 01, cover
+# Each image is full width unless it says span: half. Two half images in a row sit side by side.
 gallery:
   - src: ./page-04.jpg
     alt: Contents page listing eight chapters, from Founding to SNS and Contact.
+    span: half
+    caption: fig. 02, contents
   - src: ./page-06.jpg
     alt: Chapter 01, Founding, with a timeline of key dates.
+    span: half
+    caption: fig. 03, chapter 01, Founding
   - src: ./page-07.jpg
     alt: Illustrated map of Jeddah marking the consulate's location near the Red Sea.
+    span: full
+    caption: fig. 04, illustrated map of Jeddah
   - src: ./page-09.jpg
     alt: Navy page listing the consuls-general and their terms, in English and Japanese.
+    span: half
   - src: ./page-13.jpg
     alt: Cultural exchange spread on teamLab Borderless, with photos.
+    span: half
   - src: ./page-17.jpg
     alt: Page on the Japanese-Language Proficiency Test in Jeddah.
+    span: half
   - src: ./page-22.jpg
     alt: Navy chapter opener for Associates, listing partner organisations.
+    span: half
   - src: ./page-28.jpg
     alt: Chapter 06, Going Forward.
+    span: half
   - src: ./page-31.jpg
     alt: Gallery page of photos from consulate events.
+    span: half
   - src: ./page-43.jpg
     alt: Closing page with the phrase ichi-go ichi-e in Japanese calligraphy and the colophon.
+    span: full
+    caption: fig. 05, closing page, ichi-go ichi-e
 ---
 
 ## The brief

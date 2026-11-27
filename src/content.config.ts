@@ -32,19 +32,26 @@ const projects = defineCollection({
       blend: z.boolean().default(false),
       // Drafts are hidden from the live site
       draft: z.boolean().default(false),
+      // Optional small caption under the cover on the project page, e.g. "fig. 01, cover"
+      coverCaption: z.string().optional(),
       gallery: z
         .array(
           z.object({
             src: image(),
             alt: z.string(),
+            // Optional small caption under the image, e.g. "fig. 02, contents spread"
             caption: z.string().optional(),
-            // Wide images span the full width, others sit two to a row
+            // full: the whole width. half: side by side with the next half image.
+            // Left out, images are full width (or fill the columns when galleryColumns is set).
+            span: z.enum(['full', 'half']).optional(),
+            // Older setting, same as span: full
             wide: z.boolean().default(false),
           }),
         )
         .default([]),
-      // How many gallery images sit side by side on the project page (2 or 3)
-      galleryColumns: z.union([z.literal(2), z.literal(3)]).default(2),
+      // Older grid layout: how many gallery images sit side by side (2 or 3).
+      // When set, images fill the columns unless they have span: full.
+      galleryColumns: z.union([z.literal(2), z.literal(3)]).optional(),
     }),
 });
 

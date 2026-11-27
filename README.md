@@ -33,15 +33,42 @@ The settings at the top of `index.md`:
 | `title`, `category`, `summary` | Shown in the grid and on the project page. Categories become the filter buttons. |
 | `cover`, `coverAlt` | The main image and its description for screen readers. |
 | `coverPosition` | Which part of the cover to keep when the grid crops it, e.g. `70% center`. |
-| `client`, `year`, `role` | Optional facts on the project page. Leave out any you don't want. |
+| `coverCaption` | Optional small caption under the cover on the project page, e.g. `fig. 01, cover`. |
+| `client`, `year`, `role` | Optional. Shown with the section in one small line under the project title. Leave out any you don't want. |
 | `featured: true` | Makes it the big image on the homepage. Use it on one project only. |
 | `order` | Lower numbers appear first. |
 | `blend: true` | Melts white paper backgrounds into the site colour. Good for artwork, turn it off for photos and mockups. |
 | `draft: true` | Hides the project on the live site but still shows it while you work locally. |
-| `galleryColumns` | How many gallery images sit side by side: `2` (default) or `3`. |
-| `gallery` | Extra images. Add `wide: true` to make one span the full width. |
+| `gallery` | The project's images, shown after the cover. Each has `src` and `alt`, plus the optional settings below. |
+| `galleryColumns` | Optional, for a plain grid: `2` or `3` images to a row. Leave it out to lay images out with `span` instead. |
 
-Everything below the settings is the case study text, written in Markdown. Replace the text in [brackets].
+Each gallery image can also have:
+
+| Setting | What it does |
+| --- | --- |
+| `span: full` | The image gets the whole width. This is the default. |
+| `span: half` | The image sits side by side with the next `half` image, good for detail pairs. With `galleryColumns: 3` they sit three to a row. |
+| `caption` | Optional small caption under the image, e.g. `fig. 03, chapter 01`. Shown only when you set it. |
+| `wide: true` | Older setting, the same as `span: full`. |
+
+For example:
+
+```yaml
+gallery:
+  - src: ./spread.jpg
+    alt: Opening spread with the chapter title.
+    caption: fig. 02, opening spread
+  - src: ./detail-1.jpg
+    alt: Close-up of the emblem.
+    span: half
+  - src: ./detail-2.jpg
+    alt: Close-up of the type.
+    span: half
+```
+
+Images are never cropped on the project page: each keeps its own shape and fits within the screen height. Clicking one opens it full screen. The cover always comes first.
+
+Everything below the settings is the project's notes, written in Markdown. They appear after the images as a short "Notes" section. Replace the text in [brackets].
 
 ## Put it online (Cloudflare Pages)
 
