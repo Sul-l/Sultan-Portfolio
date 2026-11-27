@@ -5,7 +5,7 @@ export const SITE = {
   name: 'Sultan A. S.',
   tagline: 'Graphic designer and illustrator, Jeddah',
   description:
-    'Sultan Alghamdi is a graphic designer and illustrator in Jeddah working across brand identity, print and illustration.',
+    'Sul Alghamdi is a graphic designer and illustrator in Jeddah working across brand identity, print and illustration.',
   email: 'Suasghamdi@gmail.com', // TODO: replace with your real email
   links: [
     { label: 'Instagram', href: '' }, // TODO: paste your profile URL

@@ -21,6 +21,7 @@ const { title, category, cover, coverAlt, coverPosition, blend } = project.data;
       class:list={['card__image', { blend }]}
       style={`object-position: ${coverPosition}; --reveal-delay: ${delay}ms`}
       data-reveal
+      transition:name={`project-${project.id}`}
     />
   </div>
   <div class="card__meta">

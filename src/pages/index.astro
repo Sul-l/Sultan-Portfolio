@@ -15,6 +15,8 @@ const filters = SECTIONS.filter((s) => rest.some((p) => p.data.section === s.key
 
 // "A concept campaign..." becomes "Sailor Fude de Mannen, a concept campaign..."
 const caption = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
+
+// The filter buttons are run by src/scripts/filters.ts, loaded from Base.astro so it survives page swaps.
 ---
 
 <Base>
@@ -41,6 +43,7 @@ const caption = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
               class:list={['hero__image', { blend: featured.data.blend }]}
               style={`object-position: ${featured.data.coverPosition}`}
               data-reveal
+              transition:name={`project-${featured.id}`}
             />
             <figcaption class="caption">
               <span class="caption__title">{featured.data.title}</span>, {caption(featured.data.summary)}
@@ -72,7 +75,7 @@ const caption = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
     <ul class="grid" data-grid>
       {
         rest.map((project, i) => (
-          <li data-section={project.data.section}>
+          <li data-section={project.data.section} data-project={project.id}>
             <ProjectCard project={project} delay={(i % 3) * 140} />
           </li>
         ))
@@ -81,39 +84,3 @@ const caption = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
   </section>
 </Base>
 
-<script>
-  // Filters. The address bar remembers the choice (e.g. /#print), so links,
-  // refreshes and the "All work" link on a project page land on the right filter.
-  // Without JS the buttons stay hidden and every project shows.
-  const bar = document.querySelector<HTMLElement>('[data-filters]');
-  const items = document.querySelectorAll<HTMLElement>('[data-grid] > li');
-  if (bar) {
-    bar.hidden = false;
-    const buttons = [...bar.querySelectorAll<HTMLButtonElement>('[data-filter]')];
-    const keys = buttons.map((b) => b.dataset.filter);
-
-    const apply = (value: string) => {
-      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === value)));
-      items.forEach((li) => {
-        li.hidden = value !== 'all' && li.dataset.section !== value;
-      });
-    };
-
-    buttons.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const value = btn.dataset.filter ?? 'all';
-        apply(value);
-        history.replaceState(null, '', value === 'all' ? '#work' : `#${value}`);
-      });
-    });
-
-    const fromHash = () => {
-      const key = location.hash.slice(1);
-      if (!keys.includes(key) || key === 'all') return;
-      apply(key);
-      document.getElementById('work')?.scrollIntoView();
-    };
-    fromHash();
-    window.addEventListener('hashchange', fromHash);
-  }
-</script>

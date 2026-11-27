@@ -1,5 +1,6 @@
 ---
 import { SITE } from '../site';
+import Hanko from './Hanko.astro';
 
 const links = SITE.links.filter((l) => l.href);
 const year = new Date().getFullYear();
@@ -7,9 +8,12 @@ const year = new Date().getFullYear();
 
 <footer class="site-footer" id="contact">
   <div class="wrap site-footer__inner">
-    <div>
-      <h2 class="site-footer__cta">Have a project in mind?</h2>
-      <a class="site-footer__email" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+    <div class="site-footer__top">
+      <div>
+        <h2 class="site-footer__cta">Have a project in mind?</h2>
+        <a class="site-footer__email" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </div>
+      <Hanko />
     </div>
     <div class="site-footer__base">
       <span>&copy; {year} {SITE.name}</span>

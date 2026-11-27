@@ -324,10 +324,68 @@ a {
   text-decoration-thickness: 1px;
 }
 
-.card:hover .card__title,
-.card:focus-visible .card__title {
-  text-decoration: underline;
-  text-decoration-color: var(--accent);
+/* Hover and keyboard focus: the image leans in slightly inside its frame, and a
+   dry-brush stroke paints in under the title using the same brush-mask.svg as the
+   image reveal. Touch screens skip the hover version so taps don't leave it stuck on. */
+.card__image,
+.reveal .card__image[data-reveal].is-done {
+  transition: scale 0.6s var(--ease-brush);
+}
+
+.card__title {
+  position: relative;
+}
+
+.card__title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.1em;
+  height: 0.12em;
+  border-radius: 0.05em 0.4em 0.4em 0.05em;
+  pointer-events: none;
+  background-color: var(--accent);
+  /* Faint bristle streaks along the stroke */
+  background-image: linear-gradient(
+    to bottom,
+    var(--accent) 0 24%,
+    color-mix(in srgb, var(--accent) 55%, transparent) 24% 36%,
+    var(--accent) 36% 66%,
+    color-mix(in srgb, var(--accent) 70%, transparent) 66% 80%,
+    var(--accent) 80% 100%
+  );
+  -webkit-mask-image: url('/brush-mask.svg');
+  mask-image: url('/brush-mask.svg');
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0;
+  mask-position: 100% 0;
+  transition:
+    -webkit-mask-position 0.55s var(--ease-brush),
+    mask-position 0.55s var(--ease-brush);
+}
+
+.card:focus-visible .card__image {
+  scale: 1.03;
+}
+
+.card:focus-visible .card__title::after {
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+}
+
+@media (hover: hover) {
+  .card:hover .card__image {
+    scale: 1.03;
+  }
+
+  .card:hover .card__title::after {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+  }
 }
 
 .card__category {
@@ -542,6 +600,51 @@ a {
   margin: 0;
 }
 
+.site-footer__top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+}
+
+/* Hanko seal (src/components/Hanko.astro). It is stamped once when it scrolls into
+   view: it drops in slightly larger and transparent, then presses down with a tiny
+   overshoot. Without JS, or with reduced motion, it simply shows. */
+.hanko {
+  display: block;
+  flex: none;
+  width: auto;
+  height: 4.5rem;
+  color: var(--accent);
+  rotate: -2deg;
+}
+
+.reveal .hanko:not(.is-stamped) {
+  opacity: 0;
+}
+
+.reveal .hanko.is-stamped {
+  animation: hanko-stamp 560ms both;
+}
+
+@keyframes hanko-stamp {
+  0% {
+    opacity: 0;
+    scale: 1.5;
+    animation-timing-function: cubic-bezier(0.55, 0, 0.85, 0.35);
+  }
+  55% {
+    opacity: 1;
+    scale: 0.95;
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
 .site-footer__email {
   display: inline-block;
   margin-top: 1rem;
@@ -613,6 +716,51 @@ a {
   mask-image: none;
 }
 
+/* ---------- Page transitions ----------
+   The ClientRouter (src/layouts/Base.astro) crossfades the page, and a project's
+   image morphs between its card on the home grid and the cover on its own page.
+   The same timing moves the cards when the filters change (src/scripts/filters.ts).
+   These rules override Astro's defaults, which sit in @layer astro. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 300ms;
+  animation-timing-function: ease-out;
+}
+
+.card__image,
+.hero__image,
+.study__cover img {
+  view-transition-class: project;
+}
+
+.grid > li {
+  view-transition-class: card;
+}
+
+::view-transition-group(.project),
+::view-transition-group(.card),
+::view-transition-old(.project),
+::view-transition-new(.project) {
+  animation-duration: 500ms;
+  animation-timing-function: var(--ease-brush);
+}
+
+/* Crop rather than stretch while the image changes shape */
+::view-transition-old(.project),
+::view-transition-new(.project) {
+  height: 100%;
+  object-fit: cover;
+}
+
+/* An image or card with no partner on the other side just fades with the page */
+::view-transition-old(.project):only-child,
+::view-transition-new(.project):only-child,
+::view-transition-old(.card):only-child,
+::view-transition-new(.card):only-child {
+  animation-duration: 300ms;
+  animation-timing-function: ease-out;
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 1100px) {
   .grid {
@@ -662,5 +810,29 @@ a {
 @media (prefers-reduced-motion: reduce) {
   * {
     transition-duration: 0.01ms !important;
+  }
+
+  /* Cards: no image movement, and the title underline appears whole instead of
+     painting in. (The * rule above does not reach pseudo-elements.) */
+  .card:hover .card__image,
+  .card:focus-visible .card__image {
+    scale: none;
+  }
+
+  .card__title::after {
+    transition: none;
+  }
+
+  .hanko,
+  .reveal .hanko:not(.is-stamped) {
+    opacity: 1;
+    animation: none !important;
+  }
+
+  /* No morphs or crossfades: pages and filters swap instantly */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
