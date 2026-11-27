@@ -291,6 +291,9 @@ a {
 }
 
 .card {
+  --lift-ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -324,12 +327,39 @@ a {
   text-decoration-thickness: 1px;
 }
 
-/* Hover and keyboard focus: the image leans in slightly inside its frame, and a
-   dry-brush stroke paints in under the title using the same brush-mask.svg as the
-   image reveal. Touch screens skip the hover version so taps don't leave it stuck on. */
-.card__image,
-.reveal .card__image[data-reveal].is-done {
-  transition: scale 0.6s var(--ease-brush);
+/* Hover and keyboard focus: the framed artwork lifts off the page, a soft shadow
+   settles on the paper beneath it, and a dry-brush stroke paints in under the title
+   using the same brush-mask.svg as the image reveal. With a mouse, the piece also
+   tilts slightly toward the pointer (src/scripts/card-tilt.ts sets --rx and --ry).
+   Only transform and opacity animate, so it stays on the GPU. Touch screens skip the
+   hover version so taps don't leave it stuck on. */
+.card__well {
+  transition:
+    translate 0.3s var(--lift-ease),
+    transform 0.12s linear;
+}
+
+/* The shadow stays on the paper, the size of the frame, and only fades in */
+.card::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 4%;
+  right: 4%;
+  top: 0;
+  aspect-ratio: 4 / 5.2;
+  pointer-events: none;
+  box-shadow: 0 1.75rem 2.5rem -1.25rem color-mix(in srgb, var(--ink) 45%, transparent);
+  opacity: 0;
+  transition: opacity 0.3s var(--lift-ease);
+}
+
+.card:focus-visible .card__well {
+  translate: 0 -0.5rem;
+}
+
+.card:focus-visible::before {
+  opacity: 1;
 }
 
 .card__title {
@@ -364,12 +394,8 @@ a {
   -webkit-mask-position: 100% 0;
   mask-position: 100% 0;
   transition:
-    -webkit-mask-position 0.55s var(--ease-brush),
-    mask-position 0.55s var(--ease-brush);
-}
-
-.card:focus-visible .card__image {
-  scale: 1.03;
+    -webkit-mask-position 0.4s cubic-bezier(0.2, 0.7, 0.3, 1),
+    mask-position 0.4s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 .card:focus-visible .card__title::after {
@@ -378,8 +404,17 @@ a {
 }
 
 @media (hover: hover) {
-  .card:hover .card__image {
-    scale: 1.03;
+  .card__well {
+    will-change: transform, translate;
+  }
+
+  .card:hover .card__well {
+    translate: 0 -0.5rem;
+    transform: perspective(60rem) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  }
+
+  .card:hover::before {
+    opacity: 1;
   }
 
   .card:hover .card__title::after {
@@ -716,6 +751,94 @@ a {
   mask-image: none;
 }
 
+/* ---------- Custom cursor ----------
+   src/scripts/cursor.ts. Only active when <html> has .has-cursor, which the script
+   adds on devices with a real mouse or trackpad. The system cursor is hidden except
+   over text, links in body copy and form fields; the script hides the dot there. */
+.has-cursor,
+.has-cursor * {
+  cursor: none;
+}
+
+.has-cursor :is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, figcaption, blockquote, label),
+.has-cursor :is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, figcaption, blockquote, label) *,
+.has-cursor :is(input, textarea, select, [contenteditable]) {
+  cursor: auto;
+}
+
+.has-cursor :is(.card, .card *, .hero__figure a, .hero__figure a *, a.back) {
+  cursor: none;
+}
+
+.cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  view-transition-name: cursor;
+}
+
+.cursor.is-visible {
+  opacity: 1;
+}
+
+.cursor[data-state='hidden'] {
+  opacity: 0;
+}
+
+/* A 4.5rem circle shown at dot size, so it can open up with a cheap transform */
+.cursor__dot {
+  position: absolute;
+  left: -2.25rem;
+  top: -2.25rem;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: scale(0.11);
+  transition: transform 0.35s var(--ease-brush);
+}
+
+.cursor[data-state='link'] .cursor__dot {
+  transform: scale(0.22);
+}
+
+.cursor:is([data-state='view'], [data-state='back']) .cursor__dot {
+  transform: scale(1);
+}
+
+.cursor__label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  translate: -50% -55%;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.125rem;
+  line-height: 1;
+  color: var(--paper);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}
+
+.cursor:is([data-state='view'], [data-state='back']) .cursor__label {
+  opacity: 1;
+  transition-delay: 0.1s;
+}
+
+/* The cursor tracks the pointer live through page transitions, with no ghost copy */
+::view-transition-group(cursor),
+::view-transition-new(cursor) {
+  animation: none;
+}
+
+::view-transition-old(cursor) {
+  display: none;
+}
+
 /* ---------- Page transitions ----------
    The ClientRouter (src/layouts/Base.astro) crossfades the page, and a project's
    image morphs between its card on the home grid and the cover on its own page.
@@ -812,15 +935,28 @@ a {
     transition-duration: 0.01ms !important;
   }
 
-  /* Cards: no image movement, and the title underline appears whole instead of
-     painting in. (The * rule above does not reach pseudo-elements.) */
-  .card:hover .card__image,
-  .card:focus-visible .card__image {
-    scale: none;
+  /* Cards: no lift or tilt, just the shadow, and the title underline appears whole
+     instead of painting in. (The * rule above does not reach pseudo-elements.) */
+  .card:hover .card__well,
+  .card:focus-visible .card__well {
+    transform: none;
   }
 
+  /* A separate rule on purpose: in the same rule as `transform`, the CSS minifier
+     folds this into the transform and drops it, and the card would still lift. */
+  .card:is(:hover, :focus-visible) .card__well {
+    translate: none;
+  }
+
+  .card::before,
   .card__title::after {
     transition: none;
+  }
+
+  /* Cursor: the dot stays, but "View" and "Back" appear without the expand */
+  .cursor__dot,
+  .cursor__label {
+    transition: none !important;
   }
 
   .hanko,
